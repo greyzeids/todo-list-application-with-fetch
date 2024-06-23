@@ -8,12 +8,49 @@ const TodoList = () => {
     const [todos, setTodos] = useState([]);
 
     useEffect(() => {
-        getTasks();
+        initializeUserAndTasks();
     }, []);
+
+    async function initializeUserAndTasks() {
+        await getTasks();
+    }
+
+    async function createUser() {
+        try {
+            const response = await fetch(`${API_URL}users/Miquel_Carnot`, {
+                method: "POST",
+                headers: {
+                    accept: "application/json",
+                    "Content-type": "application/json",
+                },
+                body: JSON.stringify({
+                    username: "Miquel_Carnot",
+                }),
+            });
+
+            if (response.ok) {
+                console.log("User created successfully.");
+            } else {
+                console.log("User already exists or failed to create user.");
+            }
+        } catch (error) {
+            console.error("Error creating user:", error);
+        }
+    }
 
     async function getTasks() {
         try {
             const response = await fetch(`${API_URL}users/Miquel_Carnot`);
+            if (!response.ok) {
+                if (response.status === 404) {
+                    console.log("User not found, creating user...");
+                    await createUser();
+                    await getTasks();
+                    return;
+                } else {
+                    throw new Error("Failed to fetch tasks");
+                }
+            }
             const data = await response.json();
             console.log("Fetched tasks:", data);
             if (data.todos) {
@@ -50,8 +87,8 @@ const TodoList = () => {
                     if (response.ok) {
                         const newTodo = {
                             id: data.id,
-                            label: data.label,
-                            completed: data.is_done,
+                            label: inputValue,
+                            completed: false,
                         };
                         setTodos([...todos, newTodo]);
                         setInputValue("");
@@ -95,6 +132,7 @@ const TodoList = () => {
         return todos.filter((todo) => !todo.completed).length;
     };
 
+    // Render the component.
     return (
         <div className="container">
             <h1 className="text-center mb-4">Lista de Tareas</h1>
@@ -124,7 +162,7 @@ const TodoList = () => {
                             checked={todo.completed}
                             onChange={() => handleToggleCompleted(index)}
                         />
-                        {todo.label}{" "}
+                        {todo.label}
                         <i
                             className="ml-2 fa fa-trash"
                             style={{ cursor: "pointer" }}
