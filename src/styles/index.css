@@ -47,6 +47,15 @@ h1 {
     border-radius: 0px 5px 5px 0px;
 }
 
+.todo-btn2 {
+    background: #1a1a40;
+    color: rgb(255, 174, 0);
+    border: none;
+    padding: 0.55rem 1rem;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
 .Todo {
     display: flex;
     justify-content: space-between;

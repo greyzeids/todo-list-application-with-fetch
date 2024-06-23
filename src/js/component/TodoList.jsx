@@ -17,7 +17,7 @@ const TodoList = () => {
 
     async function createUser() {
         try {
-            const response = await fetch(`${API_URL}users/Miquel_Carnot`, {
+            const response = await fetch(`${API_URL}users`, {
                 method: "POST",
                 headers: {
                     accept: "application/json",
@@ -118,6 +118,23 @@ const TodoList = () => {
         }
     }
 
+    async function deleteAllTasks() {
+        try {
+            const deletePromises = todos.map((todo) =>
+                fetch(`${API_URL}todos/${todo.id}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                })
+            );
+            await Promise.all(deletePromises);
+            setTodos([]);
+        } catch (error) {
+            console.error("Error deleting all tasks:", error);
+        }
+    }
+
     const handleToggleCompleted = (indexToToggle) => {
         const updatedTodos = todos.map((todo, index) => {
             if (index === indexToToggle) {
@@ -136,7 +153,7 @@ const TodoList = () => {
     return (
         <div className="container">
             <h1 className="text-center mb-4">Lista de Tareas</h1>
-            <div className="col-12">
+            <div className="input-container">
                 <input
                     onChange={(e) => setInputValue(e.target.value)}
                     value={inputValue}
@@ -173,6 +190,11 @@ const TodoList = () => {
             </ul>
             <div className="col-12 p-0 text-white text-center">
                 {countPendingTodos()} elemento(s) pendiente(s)
+            </div>
+            <div className="col-12 p-0 text-center">
+                <button className="todo-btn2 mt-2" onClick={deleteAllTasks}>
+                    Eliminar todas las tareas
+                </button>
             </div>
         </div>
     );
