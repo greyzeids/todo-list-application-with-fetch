@@ -12,93 +12,84 @@ const TodoList = () => {
     }, []);
 
     async function getTasks() {
-        const response = await fetch(`${API_URL}users/Miquel_Carnot`);
-        const data = await response.json();
-        setTodos(data.todos);
+        try {
+            const response = await fetch(`${API_URL}users/Miquel_Carnot`);
+            const data = await response.json();
+            console.log("Fetched tasks:", data);
+            if (data.todos) {
+                setTodos(data.todos);
+            } else {
+                setTodos([]);
+            }
+        } catch (error) {
+            console.error("Error fetching tasks:", error);
+            setTodos([]);
+        }
     }
 
     async function addTodo(e) {
-        if (e.key === "Enter" && inputValue.trim() !== "") {
-            const response = await fetch(`${API_URL}todos/Miquel_Carnot`, {
-                method: "POST",
-                headers: {
-                    accept: "application/json",
-                    "Content-type": "application/json",
-                },
-                body: JSON.stringify({
-                    label: inputValue,
-                    is_done: false,
-                }),
-            });
-            const data = await response.json();
-            if (response.ok) {
-                const newTodo = {
-                    id: data.id,
-                    text: inputValue,
-                    completed: false,
-                };
-                setTodos([...todos, newTodo]);
-                setInputValue("");
+        if (e.key === "Enter" || e.type === "click") {
+            if (inputValue.trim() !== "") {
+                try {
+                    const response = await fetch(
+                        `${API_URL}todos/Miquel_Carnot`,
+                        {
+                            method: "POST",
+                            headers: {
+                                accept: "application/json",
+                                "Content-type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                label: inputValue,
+                                is_done: false,
+                            }),
+                        }
+                    );
+                    const data = await response.json();
+                    console.log("Added task:", data);
+                    if (response.ok) {
+                        const newTodo = {
+                            id: data.id,
+                            label: data.label,
+                            completed: data.is_done,
+                        };
+                        setTodos([...todos, newTodo]);
+                        setInputValue("");
+                    }
+                } catch (error) {
+                    console.error("Error adding task:", error);
+                }
             }
         }
     }
 
-    async function deleteTasks(indexToDelete) {
-        const todoToDelete = todos[indexToDelete];
-
-        await fetch(`${API_URL}${indexToDelete}`, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+    async function deleteTasks(id) {
+        try {
+            const response = await fetch(`${API_URL}todos/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            if (response.ok) {
+                setTodos(todos.filter((todo) => todo.id !== id));
+            } else {
+                console.error("Failed to delete task:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error deleting task:", error);
+        }
     }
-    //     const updatedTodos = todos.filter(
-    //         (_, index) => index !== indexToDelete
-    //     );
-    //     setTodos(updatedTodos);
-    // }
 
-    // const addTask = (task) => {
-    //     const newTasks = [...todos, task];
-    //     updateTasks(newTasks);
-    // };
-
-    // useEffect(() => {
-    //     const storedTodos = JSON.parse(localStorage.getItem("todos"));
-    //     if (storedTodos) {
-    //         setTodos(storedTodos);
-    //     }
-    // }, []);
-
-    // useEffect(() => {
-    //     localStorage.setItem("todos", JSON.stringify(todos));
-    // }, [todos]);
-
-    // const handleDelete = (indexToDelete) => {
-    //     const updatedTodos = todos.filter(
-    //         (_, index) => index !== indexToDelete
-    //     );
-    //     setTodos(updatedTodos);
-    // };
-
-    // const handleAddTodo = () => {
-    //     if (inputValue.trim() !== "") {
-    //         const newTodo = { text: inputValue, completed: false };
-    //         setTodos([...todos, newTodo]);
-    //         setInputValue("");
-    //     }
-    // };
-
-    // const handleToggleCompleted = (indexToToggle) => {
-    //     const updatedTodos = todos.map((todo, index) => {
-    //         if (index === indexToToggle) {
-    //             return { ...todo, completed: !todo.completed };
-    //         }
-    //         return todo;
-    //     });
-    //     setTodos(updatedTodos);
-    // };
+    const handleToggleCompleted = (indexToToggle) => {
+        const updatedTodos = todos.map((todo, index) => {
+            if (index === indexToToggle) {
+                return { ...todo, completed: !todo.completed };
+            }
+            return todo;
+        });
+        setTodos(updatedTodos);
+    };
 
     const countPendingTodos = () => {
         return todos.filter((todo) => !todo.completed).length;
@@ -133,7 +124,7 @@ const TodoList = () => {
                             checked={todo.completed}
                             onChange={() => handleToggleCompleted(index)}
                         />
-                        {todo.text}
+                        {todo.label}{" "}
                         <i
                             className="ml-2 fa fa-trash"
                             style={{ cursor: "pointer" }}
