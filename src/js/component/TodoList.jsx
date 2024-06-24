@@ -13,7 +13,7 @@ const TodoList = () => {
 
     async function createUser() {
         try {
-            const response = await fetch(`${API_URL}users`, {
+            const response = await fetch(`${API_URL}users/Miquel_Carnot`, {
                 method: "POST",
                 headers: {
                     accept: "application/json",
