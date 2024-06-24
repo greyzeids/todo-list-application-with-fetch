@@ -8,12 +8,8 @@ const TodoList = () => {
     const [todos, setTodos] = useState([]);
 
     useEffect(() => {
-        initializeUserAndTasks();
+        getTasks();
     }, []);
-
-    async function initializeUserAndTasks() {
-        await getTasks();
-    }
 
     async function createUser() {
         try {
@@ -157,7 +153,7 @@ const TodoList = () => {
                 <input
                     onChange={(e) => setInputValue(e.target.value)}
                     value={inputValue}
-                    onKeyDown={addTodo}
+                    onKeyDown={(e) => e.key === "Enter" && addTodo()}
                     name="text"
                     placeholder="¿Cuál es la tarea hoy?"
                     className="input"
