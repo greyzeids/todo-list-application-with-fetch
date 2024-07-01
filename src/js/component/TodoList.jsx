@@ -60,38 +60,33 @@ const TodoList = () => {
         }
     }
 
-    async function addTodo(e) {
-        if (e.key === "Enter" || e.type === "click") {
-            if (inputValue.trim() !== "") {
-                try {
-                    const response = await fetch(
-                        `${API_URL}todos/Miquel_Carnot`,
-                        {
-                            method: "POST",
-                            headers: {
-                                accept: "application/json",
-                                "Content-type": "application/json",
-                            },
-                            body: JSON.stringify({
-                                label: inputValue,
-                                is_done: false,
-                            }),
-                        }
-                    );
-                    const data = await response.json();
-                    console.log("Added task:", data);
-                    if (response.ok) {
-                        const newTodo = {
-                            id: data.id,
-                            label: inputValue,
-                            completed: false,
-                        };
-                        setTodos([...todos, newTodo]);
-                        setInputValue("");
-                    }
-                } catch (error) {
-                    console.error("Error adding task:", error);
+    async function addTodo() {
+        if (inputValue.trim() !== "") {
+            try {
+                const response = await fetch(`${API_URL}todos/Miquel_Carnot`, {
+                    method: "POST",
+                    headers: {
+                        accept: "application/json",
+                        "Content-type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        label: inputValue,
+                        is_done: false,
+                    }),
+                });
+                const data = await response.json();
+                console.log("Added task:", data);
+                if (response.ok) {
+                    const newTodo = {
+                        id: data.id,
+                        label: inputValue,
+                        completed: false,
+                    };
+                    setTodos((prevTodos) => [...prevTodos, newTodo]);
+                    setInputValue("");
                 }
+            } catch (error) {
+                console.error("Error adding task:", error);
             }
         }
     }
@@ -132,13 +127,12 @@ const TodoList = () => {
     }
 
     const handleToggleCompleted = (indexToToggle) => {
-        const updatedTodos = todos.map((todo, index) => {
+        setTodos = prevTodos.map((todo, index) => {
             if (index === indexToToggle) {
                 return { ...todo, completed: !todo.completed };
             }
             return todo;
         });
-        setTodos(updatedTodos);
     };
 
     const countPendingTodos = () => {
